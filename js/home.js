@@ -73,10 +73,8 @@ $(document).ready(function () {
         let el = $(this);
         el.addClass("disabled");
         let id = $(this).data("id");
-        alert("ESTOU EM DESENVOLVIMENTO AINDA ;D")
         el.removeClass("disabled");
-        // Manda para a tela de resenha do clube
-        // window.location = window.location.href + "/" + id
+        window.location =  "resenha.html?grupo=" + id
     });
 
 
@@ -127,7 +125,7 @@ $(document).ready(function () {
     }
 
     function renderBtnsHtml(id, clube) {
-        return '<button class="btn btn-outline-info btn-resenha fw-bold" type="button" data-id="' + id + '">' +
+        return '<button class="btn btn-outline-info btn-resenha fw-bold" type="button" data-id="' + clube + '">' +
             '   <i class="fas fa-quote-right d-inline" " data-toggle="tooltip" title="Resenha"></i>' +
             '   <span class="d-none d-sm-block">Resenha</span>' +
             '</button>' +

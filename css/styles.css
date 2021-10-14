@@ -11706,3 +11706,31 @@ body {
   letter-spacing: 0.05rem;
   padding: 0.75rem 1rem;
 }
+
+/* Chat containers */
+.container-resenha {
+  border: 2px solid #dedede;
+  background-color: #f1f1f1;
+  border-radius: 5px;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+/* Darker chat container */
+.darker {
+  border-color: #ccc;
+  background-color: #20c997;
+  text-align: right;
+}
+
+/* Style time text */
+.time-right {
+  float: right;
+  color: #000000;
+}
+
+/* Style time text */
+.time-left {
+  float: left;
+  color: #000000;
+}
