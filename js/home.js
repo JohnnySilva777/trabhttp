@@ -48,7 +48,9 @@ $(document).ready(function () {
     }
 
     $(document).on("click", ".btn-entrar", function () {
-        let id = $(this).data("id");
+        let el = $(this);
+        el.addClass("disabled");
+        let id = el.data("id");
         $.ajax({
             "url": "https://fiap-clube-api.herokuapp.com/usuarioClubes/",
             "method": "POST",
@@ -61,22 +63,29 @@ $(document).ready(function () {
             success: function (response) {
                 alert("Bem vindo ao clube")
                 $(".btn-group-" + response.clube).html(renderBtnsHtml(response.id, response.clube))
+                el.removeClass("disabled");
             }
         });
     });
 
 
     $(document).on("click", ".btn-resenha", function () {
+        let el = $(this);
+        el.addClass("disabled");
         let id = $(this).data("id");
         alert("ESTOU EM DESENVOLVIMENTO AINDA ;D")
+        el.removeClass("disabled");
         // Manda para a tela de resenha do clube
         // window.location = window.location.href + "/" + id
     });
 
 
-    $(document).on("click", ".btn-sair", function () {
-        let id = $(this).data("id");
-        let clube = $(this).data("clube");
+    $(document).on("click", ".btn-sair", function (e) {
+        let el = $(this);
+        el.addClass("disabled");
+
+        let id = el.data("id");
+        let clube = el.data("clube");
         $.ajax({
             "url": "https://fiap-clube-api.herokuapp.com/usuarioClubes/" + id + "/",
             "method": "PUT",
@@ -89,19 +98,23 @@ $(document).ready(function () {
             success: function (response) {
                 alert("O clube fica triste com sua partida, até mais")
                 $(".btn-group-" + response.clube).html(renderBtnEntrar(response.clube))
+                el.removeClass("disabled");
             }
         });
     });
 
 
-    $(document).on("click", ".ver-mais", function () {
-        let url = $(this).data("url");
+    $(document).on("click", ".ver-mais", function (e) {
+        let el = $(this);
+        el.addClass("disabled");
+        let url = el.data("url");
         $.ajax({
             "url": url,
             "method": "GET",
             headers,
             success: function (response) {
                 renderClubes(response)
+                el.removeClass("disabled");
             }
         });
     });
