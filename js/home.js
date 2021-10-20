@@ -1,7 +1,9 @@
 $(document).ready(function () {
     $("body").tooltip({selector: '[data-toggle=tooltip]'});
-    localStorage.setItem("auth", btoa('dev:dev.123'))
+    localStorage.setItem("auth", btoa('dev@fiap.com:qualquercoisa123'))
     localStorage.setItem("user_id", "1")
+    localStorage.removeItem("titulo")
+    localStorage.removeItem("clubeId")
 
     var headers = {
         "Authorization": "Basic " + localStorage.getItem("auth")
@@ -29,7 +31,7 @@ $(document).ready(function () {
         });
     }
 
-    carregarMeusClubes("https://fiap-clube-api.herokuapp.com/usuario/" + localStorage.getItem("user_id") + "/clubes/")
+    carregarMeusClubes("https://fiap-clube-api.herokuapp.com/usuarios/" + localStorage.getItem("user_id") + "/clubes/")
     carregarClubes();
 
     function carregarClubes() {
@@ -74,7 +76,10 @@ $(document).ready(function () {
         el.addClass("disabled");
         let id = $(this).data("id");
         el.removeClass("disabled");
-        window.location =  "resenha.html?grupo=" + id
+        let tituloClube = $('.titulo-' + id).html();
+        localStorage.setItem("titulo", tituloClube)
+        localStorage.setItem("clubeId", id)
+        window.location =  "resenha.html"
     });
 
 
@@ -157,7 +162,7 @@ $(document).ready(function () {
                 '<div class="container-fluid px-4">' +
                 '   <div class="row">' +
                 '       <div class="col-6">' +
-                '           <h2 class="fs-3 d-inline">' + clube.nome + '</h2><br>' +
+                '           <h2 class="fs-3 d-inline titulo-' + clube.id + '">' + clube.nome + '</h2><br>' +
                 '           <span class="text-muted">(' + tipo + ')</span>' +
                 '           <i class="mt-3 fas fa-info-circle text-primary" data-toggle="tooltip" title="' + clube.descricao + '"></i>' +
                 '       </div>' +

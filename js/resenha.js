@@ -2,21 +2,22 @@ $(document).ready(function () {
     $("#layoutSidenav_content main").addClass("d-none")
     $(".loading").removeClass("d-none")
     $("body").tooltip({selector: '[data-toggle=tooltip]'});
-    localStorage.setItem("auth", btoa('dev:dev.123'))
+    localStorage.setItem("auth", btoa('dev@fiap.com:qualquercoisa123'))
     localStorage.setItem("user_id", "1")
 
     var headers = {
         "Authorization": "Basic " + localStorage.getItem("auth")
     };
 
+    $('#tituloResenha').html("Clube : " + localStorage.getItem("titulo"))
     carregarResenhas();
 
     function carregarResenhas() {
         var url = new URL(window.location.href);
-        var idResenha = url.searchParams.get("grupo");
+        var idResenha = localStorage.getItem("clubeId");
 
         $.ajax({
-            "url": "https://fiap-clube-api.herokuapp.com/clube/"+ idResenha +"/stories/",
+            "url": "https://fiap-clube-api.herokuapp.com/clubes/"+ idResenha +"/stories/",
             "method": "GET",
             headers,
             success: function (response) {
@@ -36,7 +37,7 @@ $(document).ready(function () {
             if(resenha.usuario_id == IdUserLogado){
                 html = '' +
                     '<div class="container-resenha darker">' +
-                    '<p>' + resenha.usuario_nome + '</p>' +
+                    '<p>' + resenha.usuario_username + '</p>' +
                     '<p>' + resenha.texto + '</p>' +
                     '<span className="time-left">' + resenha.data + '</span>' +
                     '</div>';
@@ -57,7 +58,7 @@ $(document).ready(function () {
 
     $(document).on("click", ".enviarResenha", function () {
         var url = new URL(window.location.href);
-        var idGrupo = url.searchParams.get("grupo");
+        var idGrupo = localStorage.getItem("clubeId");
         var todayDate = new Date().toISOString().slice(0, 10);
         console.log(todayDate);
         $.ajax({
