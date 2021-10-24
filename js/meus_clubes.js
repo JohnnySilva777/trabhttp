@@ -1,14 +1,17 @@
 $(document).ready(function () {
-    $("body").tooltip({selector: '[data-toggle=tooltip]'});
+    $("body").tooltip({
+        selector: '[data-toggle=tooltip]'
+    });
     localStorage.setItem("auth", btoa('dev@fiap.com:qualquercoisa123'))
     localStorage.setItem("user_id", "1")
-    localStorage.removeItem("titulo")
-    localStorage.removeItem("clubeId")
-
+    user_Id = localStorage.getItem("user_id")
+    var clube
     var headers = {
         "Authorization": "Basic " + localStorage.getItem("auth")
     };
 
+    var Clubes = [];
+    
     var meusClubes = [];
 
     var meusTipos = [];
@@ -24,8 +27,12 @@ $(document).ready(function () {
                 $(".loading").removeClass("d-none")
             },
             success: function (response) {
-                for (let x in response.results) {
-                    meusClubes.push(response.results[x])
+                res = response.results
+                if(res.length<1 )
+                    renderSemClube()
+                for (let x in res) {
+                    carregarClube(res[x].clube_id)
+                    meusClubes.push(res[x])
                 }
                 if (response.next !== null)
                     carregarMeusClubes(response.next);
@@ -34,7 +41,6 @@ $(document).ready(function () {
     }
 
     carregarTipos()
-    carregarClubes()
     carregarMeusClubes(`https://fiap-clube-api.herokuapp.com/usuarios/${localStorage.getItem("user_id")}/clubes`)
 
     function carregarTipos() {
@@ -54,9 +60,10 @@ $(document).ready(function () {
             }
         });
     }
-    function carregarClubes() {
+
+    function carregarClube(clube_id) {
         $.ajax({
-            "url": "https://fiap-clube-api.herokuapp.com/clubes",
+            "url": `https://fiap-clube-api.herokuapp.com/clubes/${clube_id}`,
             "method": "GET",
             headers,
             beforeSend: function () {
@@ -64,9 +71,15 @@ $(document).ready(function () {
                 $(".loading").removeClass("d-none")
             },
             success: function (response) {
-                renderClubes(response)
+                res = response
+                for (let x in res) {
+                    if (x !== localStorage.getItem("user_id")) {
+                        Clubes.push(res[x])
+                    } else {}
+                }
+                renderClubes(response);
             }
-        });
+        })
     }
 
     $(document).on("click", ".btn-entrar", function () {
@@ -83,7 +96,7 @@ $(document).ready(function () {
             },
             headers,
             success: function (response) {
-                alert("Bem vindo ao clube. Clique em Meus Clubes para verificar.")
+                alert("Bem vindo ao clube")
                 $(".btn-group-" + response.clube).html(renderBtnsHtml(response.id, response.clube))
                 el.removeClass("disabled");
             }
@@ -95,11 +108,10 @@ $(document).ready(function () {
         let el = $(this);
         el.addClass("disabled");
         let id = $(this).data("id");
+        alert("ESTOU EM DESENVOLVIMENTO AINDA ;D")
         el.removeClass("disabled");
-        let tituloClube = $('.titulo-' + id).html();
-        localStorage.setItem("titulo", tituloClube)
-        localStorage.setItem("clubeId", id)
-        window.location =  "resenha.html"
+        // Manda para a tela de resenha do clube
+        // window.location = window.location.href + "/" + id
     });
 
 
@@ -120,8 +132,12 @@ $(document).ready(function () {
                 alert("O clube fica triste com sua partida, até mais")
                 $(".btn-group-" + clube.clube_nome).html(renderBtnEntrar(clube.clube_nome))
                 el.removeClass("disabled");
-                window.location.reload();
-                return false;
+                const removeIndex = meusClubes.findIndex( item => item.id === id );
+                meusClubes.splice( removeIndex, 1 );
+                if(Object.keys(meusClubes).length > 0)               
+                    carregarClube(user_Id);
+                else
+                    renderSemClube()
             }
         });
     });
@@ -142,6 +158,10 @@ $(document).ready(function () {
         });
     });
 
+    function renderSemClube(){ 
+        alert("Cadastre um clube primeiro!")
+    }
+
     function renderBtnEntrar(id) {
         return '<button class="btn btn-success btn-entrar fw-bold" type="button" data-id="' + id + '">' +
             '   <i class="fas fa-sign-in-alt d-inline" " data-toggle="tooltip" title="Entrar"></i>' +
@@ -150,12 +170,12 @@ $(document).ready(function () {
     }
 
     function renderBtnsHtml(id, clube) {
-        return '<button class="btn btn-outline-info btn-resenha fw-bold" type="button" data-id="' + clube + '">' +
+        return '<button class="btn btn-outline-info btn-resenha fw-bold" type="button" data-id="' + id + '">' +
             '   <i class="fas fa-quote-right d-inline" " data-toggle="tooltip" title="Resenha"></i>' +
             '   <span class="d-none d-sm-block">Resenha</span>' +
             '</button>' +
             '<button class="btn btn-danger btn-sair fw-bold" type="button" data-clube="' + clube + '" data-id="' + id + '">' +
-            '   <i class="fas fa-sign-out-alt d-inline" " data-toggle="tooltip" title="Entrar"></i>' +
+            '   <i class="fas fa-sign-out-alt d-inline" " data-toggle="tooltip" title="Sair"></i>' +
             '   <span class="d-none d-sm-block">Sair do grupo</span>' +
             '</button>';
     }
@@ -164,36 +184,30 @@ $(document).ready(function () {
         $(".loading").addClass("d-none")
         $("#layoutSidenav_content main").removeClass("d-none")
         let proximaPagina = resp.next;
-        for (var x in resp.results) {
-            clube = resp.results[x];
-            tipo = clube.tipo == "L" ? "Livro" : clube.tipo == "F" ? "Filme" :
-            clube.tipo == "A" ? "Anime" : "Jogo"
-            let btnEntrar = renderBtnEntrar(clube.id);
-            let btnsHtml = '';
-            for (let y in meusClubes) {
-                if (clube.id === meusClubes[y].clube_id && meusClubes[y].ativo) {
-                    btnEntrar = '';
-                    btnsHtml = renderBtnsHtml(meusClubes[y].id, clube.id)
-                }
-            }
-            html = '' +
-                '<div class="container-fluid px-4">' +
-                '   <div class="row">' +
-                '       <div class="col-6">' +
-                '           <h2 class="fs-3 d-inline titulo-' + clube.id + '">' + clube.nome + '</h2><br>' +
-                '           <span class="text-muted">(' + tipo + ')</span>' +
-                '           <i class="mt-3 fas fa-info-circle text-primary" data-toggle="tooltip" title="' + clube.descricao + '"></i>' +
-                '       </div>' +
-                '       <div class="col-4">' +
-                '           <div class="btn-group btn-group-' + clube.id + '">' +
-                '               ' + btnEntrar +
-                '               ' + btnsHtml +
-                '           </div>' +
-                '       </div>' +
-                '   </div>' +
-                '<hr class="clearfix"></div>';
-            $(".div-clubes").append(html)
-        }
+        clube = meusClubes.find(x => x.clube_id == resp.id)
+        tipo = resp.tipo == "L" ? "Livro" : resp.tipo == "F" ? "Filme" :
+            resp.tipo == "A" ? "Anime" : "Jogo"
+        let btnEntrar = renderBtnEntrar(clube.id);
+        let btnsHtml = '';
+        btnEntrar = '';
+        btnsHtml = renderBtnsHtml(clube.id, clube.clube_nome)
+        html = '' +
+            '<div class="container-fluid px-4 ">' +
+            '   <div class="row" id="' + clube.id + '">' +
+            '       <div class="col-6">' +
+            '           <h2 class="fs-3 d-inline">' + clube.clube_nome + '</h2><br>' +
+            '           <span class="text-muted">(' + tipo + ')</span>' +
+            '           <i class="mt-3 fas fa-info-circle text-primary" data-toggle="tooltip" title="' + resp.descricao + '"></i>' +
+            '       </div>' +
+            '       <div class="col-4">' +
+            '           <div class="btn-group btn-group-' + clube.id + '">' +
+            '               ' + btnEntrar +
+            '               ' + btnsHtml +
+            '           </div>' +
+            '       </div>' +
+            '   </div>' +
+            '<hr class="clearfix"></div>';
+        $(".div-clubes").append(html)
 
         if (proximaPagina) {
             $('.ver-mais').removeClass('d-none')
@@ -201,6 +215,8 @@ $(document).ready(function () {
         } else {
             $('.ver-mais').addClass('d-none')
         }
-        $("html, body").animate({scrollTop: $(document).height() - 1130}, 300);
+        $("html, body").animate({
+            scrollTop: $(document).height() - 1130
+        }, 300);
     }
 });
